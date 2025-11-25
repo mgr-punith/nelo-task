@@ -1,47 +1,47 @@
 // /app/login/page.tsx
-'use client'
-import { useState, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { useSession } from '@/hooks/useSession'
-import { LogIn, Mail, Lock } from 'lucide-react'
-import Link from 'next/link'
+"use client";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useJWTSession } from "@/hooks/useJWTSession";
+import { LogIn, Mail, Lock } from "lucide-react";
+import Link from "next/link";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [successMessage, setSuccessMessage] = useState('')
-  const { login } = useSession()
-  const router = useRouter()
-  const searchParams = useSearchParams()
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const { login } = useJWTSession();
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
-    // Show success message if redirected from register
-    if (searchParams.get('registered') === 'true') {
-      setSuccessMessage('Account created successfully! Please login.')
+    if (searchParams.get("registered") === "true") {
+      setSuccessMessage("Account created successfully! Please login.");
     }
-  }, [searchParams])
+  }, [searchParams]);
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError('')
-    setSuccessMessage('')
-    setLoading(true)
+    e.preventDefault();
+    setError("");
+    setSuccessMessage("");
+    setLoading(true);
 
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
-    })
-    const json = await res.json()
-    setLoading(false)
+    });
+    const json = await res.json();
+    setLoading(false);
 
     if (json.success) {
-      login(json.user)
-      router.push('/dashboard')
+      // Store JWT token and login
+      login(json.token, json.user);
+      router.push("/dashboard");
     } else {
-      setError(json.message || 'Login failed')
+      setError(json.message || "Login failed");
     }
   }
 
@@ -53,12 +53,18 @@ export default function LoginPage() {
             <LogIn className="h-8 w-8 text-blue-600" />
           </div>
         </div>
-        <h2 className="text-3xl font-bold text-center mb-2 text-gray-900">Welcome Back</h2>
-        <p className="text-center text-gray-600 mb-8">Login to your account</p>
+        <h2 className="text-3xl font-bold text-center mb-2 text-gray-900">
+          Welcome Back
+        </h2>
+        <p className="text-center text-gray-600 mb-8">
+          Login with JWT authentication
+        </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Email
+            </label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
@@ -67,13 +73,15 @@ export default function LoginPage() {
                 type="email"
                 value={email}
                 required
-                onChange={e => setEmail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Password
+            </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
@@ -82,7 +90,7 @@ export default function LoginPage() {
                 type="password"
                 value={password}
                 required
-                onChange={e => setPassword(e.target.value)}
+                onChange={(e) => setPassword(e.target.value)}
               />
             </div>
           </div>
@@ -104,17 +112,20 @@ export default function LoginPage() {
             type="submit"
             disabled={loading}
           >
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? "Logging in..." : "Login with JWT"}
           </button>
         </form>
 
         <p className="mt-6 text-center text-sm text-gray-600">
-          Don't have an account?{' '}
-          <Link href="/register" className="text-blue-600 hover:text-blue-700 font-semibold">
+          Don't have an account?{" "}
+          <Link
+            href="/register"
+            className="text-blue-600 hover:text-blue-700 font-semibold"
+          >
             Sign up here
           </Link>
         </p>
       </div>
     </main>
-  )
+  );
 }
