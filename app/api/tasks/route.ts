@@ -17,7 +17,7 @@ export async function GET(req: Request) {
     where.priority = filter as Priority;
   }
 
-  if (search) {
+  if (search) {          //Elastic Search Flow
     where.OR = [
       { title: { contains: search, mode: "insensitive" } },
       { description: { contains: search, mode: "insensitive" } },
