@@ -1,4 +1,3 @@
-// /app/api/auth/login/route.ts
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
@@ -22,7 +21,7 @@ export async function POST(req: Request) {
     )
   }
 
-  // Check password
+
   if (user.password !== password) {
     return NextResponse.json(
       { success: false, message: 'Invalid password.' },
