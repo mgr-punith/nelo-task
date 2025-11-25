@@ -1,4 +1,3 @@
-// /components/TaskCard.tsx
 "use client";
 
 import { useState } from "react";
@@ -13,6 +12,16 @@ const priorityBadge: Record<Priority, string> = {
 type Props = {
   task: Task;
   onChanged: () => void;
+};
+
+const getUserIdFromToken = (): number | null => {
+  const token = sessionStorage.getItem("taskflow_jwt_token");
+  if (!token) return null;
+  try {
+    return JSON.parse(atob(token.split(".")[1])).userId;
+  } catch {
+    return null;
+  }
 };
 
 export default function TaskCard({ task, onChanged }: Props) {
@@ -31,25 +40,29 @@ export default function TaskCard({ task, onChanged }: Props) {
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) => {
-    const { name, value } = e.target;
-    setLocal((prev) => ({ ...prev, [name]: value }));
+    setLocal((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const makeApiCall = async (method: string, body: object) => {
+    const userId = getUserIdFromToken();
+    if (!userId) return;
+
+    await fetch("/api/tasks", {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...body, userId }),
+    });
+    onChanged();
   };
 
   const saveEdit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!local.title || !local.priority || !local.dueDate) return;
+
     setSaving(true);
-    await fetch("/api/tasks", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id: task.id,
-        ...local,
-      }),
-    });
+    await makeApiCall("PUT", { id: task.id, ...local });
     setSaving(false);
     setEditing(false);
-    onChanged();
   };
 
   const deleteTask = async () => {
@@ -57,24 +70,16 @@ export default function TaskCard({ task, onChanged }: Props) {
       setConfirmDelete(true);
       return;
     }
-    await fetch("/api/tasks", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: task.id }),
-    });
-    onChanged();
+    await makeApiCall("DELETE", { id: task.id });
   };
 
   const toggleStatus = async () => {
     const nextStatus: Status =
       task.status === "COMPLETED" ? "PENDING" : "COMPLETED";
-    await fetch("/api/tasks", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: task.id, status: nextStatus }),
-    });
-    onChanged();
+    await makeApiCall("PUT", { id: task.id, status: nextStatus });
   };
+
+  const isCompleted = task.status === "COMPLETED";
 
   return (
     <div className="flex flex-col gap-2 rounded-lg bg-white p-4 shadow">
@@ -98,7 +103,7 @@ export default function TaskCard({ task, onChanged }: Props) {
               name="priority"
               value={local.priority}
               onChange={handleChange}
-              className="w-full rounded border p-2 sm:w-1/2 text-gray-900"
+              className="w-full rounded border p-2 text-gray-900 sm:w-1/2"
               required
             >
               <option value="HIGH">High</option>
@@ -110,7 +115,7 @@ export default function TaskCard({ task, onChanged }: Props) {
               name="dueDate"
               value={local.dueDate}
               onChange={handleChange}
-              className="w-full rounded border p-2 sm:w-1/2 text-gray-900"
+              className="w-full rounded border p-2 text-gray-900 sm:w-1/2"
               required
             />
           </div>
@@ -125,7 +130,7 @@ export default function TaskCard({ task, onChanged }: Props) {
             <button
               type="button"
               onClick={() => setEditing(false)}
-              className="rounded bg-gray-300 px-3 py-1 text-sm"
+              className="rounded bg-gray-300 px-3 py-1 text-sm hover:bg-gray-400"
             >
               Cancel
             </button>
@@ -134,7 +139,9 @@ export default function TaskCard({ task, onChanged }: Props) {
       ) : (
         <>
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">{task.title}</h3>
+            <h3 className="text-lg font-semibold text-gray-900">
+              {task.title}
+            </h3>
             <span
               className={`rounded px-2 py-1 text-xs font-semibold uppercase text-white ${
                 priorityBadge[task.priority]
@@ -143,19 +150,21 @@ export default function TaskCard({ task, onChanged }: Props) {
               {task.priority}
             </span>
           </div>
-          <p className="text-sm text-gray-700">{task.description}</p>
+          {task.description && (
+            <p className="text-sm text-gray-700">{task.description}</p>
+          )}
           <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
             <span className="font-medium text-gray-900">
               Due: {new Date(task.dueDate).toLocaleDateString()}
             </span>
             <span
               className={`rounded px-2 py-1 font-semibold ${
-                task.status === "COMPLETED"
+                isCompleted
                   ? "bg-green-600 text-white"
                   : "bg-gray-300 text-gray-800"
               }`}
             >
-              {task.status === "COMPLETED" ? "Completed" : "Pending"}
+              {isCompleted ? "Completed" : "Pending"}
             </span>
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
@@ -169,7 +178,7 @@ export default function TaskCard({ task, onChanged }: Props) {
               onClick={toggleStatus}
               className="rounded bg-purple-500 px-3 py-1 text-xs font-medium text-white hover:bg-purple-600"
             >
-              {task.status === "COMPLETED" ? "Mark Pending" : "Mark Complete"}
+              {isCompleted ? "Mark Pending" : "Mark Complete"}
             </button>
             <button
               onClick={deleteTask}

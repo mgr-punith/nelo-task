@@ -63,7 +63,7 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 mb-40">
         <div className="text-center">
           <h1 className="text-5xl lg:text-7xl font-extrabold text-gray-900 mb-6 leading-tight">
             Manage Tasks,
@@ -95,103 +95,6 @@ export default function LandingPage() {
             >
               {isLoggedIn ? "View Dashboard" : "Login"}
             </button>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">
-            Everything You Need
-          </h2>
-          <p className="text-xl text-gray-600">
-            Powerful features to keep you organized
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {/* Feature 1 */}
-          <div className="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition-shadow">
-            <div className="bg-blue-100 w-14 h-14 rounded-lg flex items-center justify-center mb-4">
-              <CheckCircle className="h-7 w-7 text-blue-600" />
-            </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-3">
-              Full CRUD Operations
-            </h3>
-            <p className="text-gray-600">
-              Create, read, update, and delete tasks with inline editing and
-              instant updates.
-            </p>
-          </div>
-
-          {/* Feature 2 */}
-          <div className="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition-shadow">
-            <div className="bg-purple-100 w-14 h-14 rounded-lg flex items-center justify-center mb-4">
-              <Filter className="h-7 w-7 text-purple-600" />
-            </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-3">
-              Smart Filtering
-            </h3>
-            <p className="text-gray-600">
-              Filter by status (completed/pending) and priority levels
-              (high/medium/low).
-            </p>
-          </div>
-
-          {/* Feature 3 */}
-          <div className="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition-shadow">
-            <div className="bg-green-100 w-14 h-14 rounded-lg flex items-center justify-center mb-4">
-              <Search className="h-7 w-7 text-green-600" />
-            </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-3">
-              Debounced Search
-            </h3>
-            <p className="text-gray-600">
-              Real-time case-insensitive search with optimized debouncing for
-              performance.
-            </p>
-          </div>
-
-          {/* Feature 4 */}
-          <div className="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition-shadow">
-            <div className="bg-yellow-100 w-14 h-14 rounded-lg flex items-center justify-center mb-4">
-              <Zap className="h-7 w-7 text-yellow-600" />
-            </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-3">
-              Lightning Fast
-            </h3>
-            <p className="text-gray-600">
-              Built with Next.js 16 and Prisma for blazing-fast performance and
-              reliability.
-            </p>
-          </div>
-
-          {/* Feature 5 */}
-          <div className="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition-shadow">
-            <div className="bg-red-100 w-14 h-14 rounded-lg flex items-center justify-center mb-4">
-              <Lock className="h-7 w-7 text-red-600" />
-            </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-3">
-              Session Management
-            </h3>
-            <p className="text-gray-600">
-              Secure session-based authentication with automatic protection for
-              private routes.
-            </p>
-          </div>
-
-          {/* Feature 6 */}
-          <div className="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition-shadow">
-            <div className="bg-indigo-100 w-14 h-14 rounded-lg flex items-center justify-center mb-4">
-              <Clock className="h-7 w-7 text-indigo-600" />
-            </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-3">
-              Priority & Due Dates
-            </h3>
-            <p className="text-gray-600">
-              Set priorities and deadlines to stay on top of what matters most.
-            </p>
           </div>
         </div>
       </section>

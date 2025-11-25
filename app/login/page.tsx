@@ -1,47 +1,48 @@
-// /app/login/page.tsx
-"use client";
-import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useJWTSession } from "@/hooks/useJWTSession";
-import { LogIn, Mail, Lock } from "lucide-react";
-import Link from "next/link";
+'use client'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useJWTSession } from '@/hooks/useJWTSession'
+import { LogIn, Mail, Lock } from 'lucide-react'
+import Link from 'next/link'
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
-  const { login } = useJWTSession();
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [successMessage, setSuccessMessage] = useState('')
+  const { login } = useJWTSession()  // Make sure this is imported
+  const router = useRouter()
+  const searchParams = useSearchParams()
 
   useEffect(() => {
-    if (searchParams.get("registered") === "true") {
-      setSuccessMessage("Account created successfully! Please login.");
+    if (searchParams.get('registered') === 'true') {
+      setSuccessMessage('Account created successfully! Please login.')
     }
-  }, [searchParams]);
+  }, [searchParams])
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    setSuccessMessage("");
-    setLoading(true);
+    e.preventDefault()
+    setError('')
+    setSuccessMessage('')
+    setLoading(true)
 
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
-    });
-    const json = await res.json();
-    setLoading(false);
+    })
+    const json = await res.json()
+    setLoading(false)
+
+    console.log('Login response:', json) // Debug log
 
     if (json.success) {
-      // Store JWT token and login
-      login(json.token, json.user);
-      router.push("/dashboard");
+      console.log('Calling login with token:', json.token) // Debug log
+      login(json.token, json.user)  // THIS IS CRITICAL
+      router.push('/dashboard')
     } else {
-      setError(json.message || "Login failed");
+      setError(json.message || 'Login failed')
     }
   }
 

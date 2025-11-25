@@ -60,7 +60,7 @@ export default function DashboardPage() {
 
     checkPendingTasks();
 
-    const interval = setInterval(checkPendingTasks, 20 * 60 * 1000);
+    const interval = setInterval(checkPendingTasks, 20 * 60 * 1000); //for evry 20-mins it will senmd
 
     return () => clearInterval(interval);
   }, [tasks, isAuthenticated, user]);

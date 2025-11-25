@@ -1,8 +1,12 @@
 // /components/TaskForm.tsx
 "use client";
 
-import { useState } from "react";
-import type { Priority } from "@prisma/client";
+import { useState, FormEvent } from "react";
+import { Priority } from "@prisma/client";
+
+type Props = {
+  onCreated: () => void;
+};
 
 const defaultForm = {
   title: "",
@@ -11,25 +15,37 @@ const defaultForm = {
   dueDate: "",
 };
 
-type Props = {
-  onCreated: () => void;
+const getUserIdFromToken = (): number | null => {
+  if (typeof window === 'undefined') return null;
+  
+  const token = sessionStorage.getItem('taskflow_jwt_token');
+  if (!token) {
+    console.error('No token found in sessionStorage');
+    return null;
+  }
+
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    console.log('Decoded token payload:', payload);
+    return payload.userId || null;
+  } catch (e) {
+    console.error('Error decoding token:', e);
+    return null;
+  }
 };
 
 export default function TaskForm({ onCreated }: Props) {
   const [form, setForm] = useState(defaultForm);
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
 
@@ -38,80 +54,89 @@ export default function TaskForm({ onCreated }: Props) {
       return;
     }
 
-    setLoading(true);
-    const res = await fetch("/api/tasks", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    const data = await res.json();
-    setLoading(false);
+    const userId = getUserIdFromToken();
+    console.log('Retrieved userId:', userId);
 
-    if (!res.ok || !data.success) {
-      setError(data.message || "Failed to create task.");
+    if (!userId) {
+      setError("You must be logged in to create tasks.");
       return;
     }
 
-    setForm(defaultForm); // clears the form after submit
-    onCreated();
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, userId }),
+      });
+
+      const data = await res.json();
+      setLoading(false);
+
+      if (!res.ok || !data.success) {
+        setError(data.message || "Failed to create task.");
+        return;
+      }
+
+      setForm(defaultForm);
+      onCreated();
+    } catch (err) {
+      setLoading(false);
+      setError("Network error. Please try again.");
+      console.error(err);
+    }
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="mb-6 rounded-lg bg-white p-6 shadow "
-    >
-      <h2 className="mb-4 text-lg font-semibold text-gray-900">Create Task</h2>
-
-      <input
-        name="title"
-        value={form.title}
-        onChange={handleChange}
-        placeholder="Title"
-        className="mb-3 w-full rounded border p-2 text-gray-900"
-        required
-      />
-
-      <textarea
-        name="description"
-        value={form.description}
-        onChange={handleChange}
-        placeholder="Description"
-        className="mb-3 w-full rounded border p-2 text-gray-900"
-      />
-
-      <div className="mb-3 flex flex-col gap-3 sm:flex-row">
-        <select
-          name="priority"
-          value={form.priority}
-          onChange={handleChange}
-          className="w-full rounded border p-2 sm:w-1/2 text-gray-900"
-          required
-        >
-          <option value="HIGH">High</option>
-          <option value="MEDIUM">Medium</option>
-          <option value="LOW">Low</option>
-        </select>
-
+    <div className="bg-white p-6 rounded-lg shadow mb-6">
+      <h2 className="text-xl font-bold mb-4 text-gray-900">Create Task</h2>
+      <form onSubmit={handleSubmit}>
         <input
-          type="date"
-          name="dueDate"
-          value={form.dueDate}
+          name="title"
+          value={form.title}
           onChange={handleChange}
-          className="w-full rounded border p-2 sm:w-1/2 text-gray-900"
+          className="border p-2 mb-2 w-full rounded text-gray-900"
+          placeholder="Task Title"
           required
         />
-      </div>
-
-      {error && <p className="mb-2 text-sm text-red-600">{error}</p>}
-
-      <button
-        type="submit"
-        disabled={loading}
-        className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-60"
-      >
-        {loading ? "Saving..." : "Add Task"}
-      </button>
-    </form>
+        <textarea
+          name="description"
+          value={form.description}
+          onChange={handleChange}
+          className="border p-2 mb-2 w-full rounded text-gray-900"
+          placeholder="Description"
+        />
+        <div className="grid grid-cols-2 gap-2">
+          <select
+            name="priority"
+            value={form.priority}
+            onChange={handleChange}
+            className="border p-2 mb-2 w-full rounded text-gray-900"
+            required
+          >
+            <option value="HIGH">High</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="LOW">Low</option>
+          </select>
+          <input
+            type="date"
+            name="dueDate"
+            value={form.dueDate}
+            onChange={handleChange}
+            className="border p-2 mb-2 w-full rounded text-gray-900"
+            required
+          />
+        </div>
+        {error && <p className="text-red-600 text-sm mb-2">{error}</p>}
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+        >
+          {loading ? "Adding..." : "Add Task"}
+        </button>
+      </form>
+    </div>
   );
 }
