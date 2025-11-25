@@ -6,6 +6,7 @@ import TaskCard from "@/components/TaskCard";
 import Filters from "@/components/Filters";
 import useDebounce from "@/hooks/useDebounce";
 import type { Task } from "@prisma/client";
+import { useSession } from "@/hooks/useSession";
 
 export default function DashboardPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -13,6 +14,11 @@ export default function DashboardPage() {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
   const [loading, setLoading] = useState(false);
+  const { checkProtected, logout, user } = useSession();
+
+  useEffect(() => {
+    checkProtected();
+  }, []);
 
   async function fetchTasks() {
     setLoading(true);
@@ -32,13 +38,26 @@ export default function DashboardPage() {
   return (
     <main className="min-h-screen bg-gray-100 p-4">
       <div className="mx-auto max-w-3xl">
-        <h1 className="mb-4 text-2xl font-bold">Task Manager Dashboard</h1>
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-2xl font-bold text-gray-800">Task Manager Dashboard</h1>
+          <div className="flex items-center gap-3">
+            {user && (
+              <span className="text-sm text-gray-800">{user.email}</span>
+            )}
+            <button
+              onClick={logout}
+              className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
         <TaskForm onCreated={fetchTasks} />
         <Filters filter={filter} setFilter={setFilter} />
         <input
           type="text"
           placeholder="Search tasks..."
-          className="w-full p-2 mb-4 rounded border"
+          className="w-full p-2 mb-4 rounded border text-gray-900"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />

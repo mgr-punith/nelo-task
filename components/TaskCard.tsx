@@ -84,21 +84,21 @@ export default function TaskCard({ task, onChanged }: Props) {
             name="title"
             value={local.title}
             onChange={handleChange}
-            className="mb-2 w-full rounded border p-2"
+            className="mb-2 w-full rounded border p-2 text-gray-900"
             required
           />
           <textarea
             name="description"
             value={local.description}
             onChange={handleChange}
-            className="mb-2 w-full rounded border p-2"
+            className="mb-2 w-full rounded border p-2 text-gray-900"
           />
           <div className="mb-2 flex flex-col gap-2 sm:flex-row">
             <select
               name="priority"
               value={local.priority}
               onChange={handleChange}
-              className="w-full rounded border p-2 sm:w-1/2"
+              className="w-full rounded border p-2 sm:w-1/2 text-gray-900"
               required
             >
               <option value="HIGH">High</option>
@@ -110,7 +110,7 @@ export default function TaskCard({ task, onChanged }: Props) {
               name="dueDate"
               value={local.dueDate}
               onChange={handleChange}
-              className="w-full rounded border p-2 sm:w-1/2"
+              className="w-full rounded border p-2 sm:w-1/2 text-gray-900"
               required
             />
           </div>
@@ -134,7 +134,7 @@ export default function TaskCard({ task, onChanged }: Props) {
       ) : (
         <>
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold">{task.title}</h3>
+            <h3 className="text-lg font-semibold text-gray-900">{task.title}</h3>
             <span
               className={`rounded px-2 py-1 text-xs font-semibold uppercase text-white ${
                 priorityBadge[task.priority]
@@ -145,7 +145,7 @@ export default function TaskCard({ task, onChanged }: Props) {
           </div>
           <p className="text-sm text-gray-700">{task.description}</p>
           <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
-            <span className="font-medium">
+            <span className="font-medium text-gray-900">
               Due: {new Date(task.dueDate).toLocaleDateString()}
             </span>
             <span
