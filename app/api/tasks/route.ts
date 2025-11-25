@@ -1,12 +1,34 @@
-
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Priority, Status } from "@prisma/client";
 
-export async function GET() {
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+  const filter = url.searchParams.get("filter") || "all";
+  const search = url.searchParams.get("search")?.toLowerCase() || "";
+
+  const where: any = {};
+
+  if (filter === "completed") {
+    where.status = Status.COMPLETED;
+  } else if (filter === "pending") {
+    where.status = Status.PENDING;
+  } else if (filter === "HIGH" || filter === "MEDIUM" || filter === "LOW") {
+    where.priority = filter as Priority;
+  }
+
+  if (search) {
+    where.OR = [
+      { title: { contains: search, mode: "insensitive" } },
+      { description: { contains: search, mode: "insensitive" } },
+    ];
+  }
+
   const tasks = await prisma.task.findMany({
+    where,
     orderBy: { dueDate: "asc" },
   });
+
   return NextResponse.json({ tasks });
 }
 
